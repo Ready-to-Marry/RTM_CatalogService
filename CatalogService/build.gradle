@@ -31,23 +31,36 @@ dependencyManagement {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+
+    // MapStruct (DTO ↔ Entity 매핑)
+    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // PostgreSQL JDBC Driver
     implementation 'org.postgresql:postgresql:42.2.5'
 
-    // Spring Boot Actuator (Health Check용)
+    // Spring Boot Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    // eureka client
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+//    // Eureka Client
+//    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+    // H2 Database (개발/테스트용 인메모리 DB)
+    runtimeOnly 'com.h2database:h2'
 }
+
+
 
 tasks.named('test') {
     useJUnitPlatform()
