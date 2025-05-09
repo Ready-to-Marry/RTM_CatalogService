@@ -167,31 +167,75 @@ public class InternalItemService {
         return item.getItemId();
     }
 
-
     // 4. 수정
     public void update(Long itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
+        // 1. 기본 item 정보 수정
         item.setName(request.getName());
         item.setPrice(request.getPrice());
         item.setRegion(request.getRegion());
         item.setThumbnailUrl(request.getThumbnailUrl());
         itemRepository.save(item);
 
+        // 2. 스타일/태그 재정의
         tagRepository.deleteByItemId(itemId);
         styleRepository.deleteByItemId(itemId);
 
         List<Tag> tags = request.getTags().stream()
                 .map(tag -> new Tag(null, itemId, tag))
                 .toList();
+
         List<Style> styles = request.getStyles().stream()
                 .map(style -> new Style(null, itemId, style))
                 .toList();
 
         tagRepository.saveAll(tags);
         styleRepository.saveAll(styles);
+
+        // 3. 상세 테이블 분기 업데이트 (item.getField()는 enum FieldType)
+        switch (item.getField()) {
+            case WEDDING_HALL -> weddingHallRepository.findById(itemId).ifPresent(hall -> {
+                hall.setAddress(request.getAddress());
+                hall.setMealPrice(request.getMealPrice());
+                hall.setCapacity(request.getCapacity());
+                hall.setParkingCapacity(request.getParkingCapacity());
+                hall.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case STUDIO -> studioRepository.findById(itemId).ifPresent(studio -> {
+                studio.setAddress(request.getAddress());
+                studio.setDescription(request.getDescription());
+                studio.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case DRESS -> dressRepository.findById(itemId).ifPresent(dress -> {
+                dress.setAddress(request.getAddress());
+                dress.setDescription(request.getDescription());
+                dress.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case MAKEUP -> makeupRepository.findById(itemId).ifPresent(makeup -> {
+                makeup.setAddress(request.getAddress());
+                makeup.setDescription(request.getDescription());
+                makeup.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case BOUQUET -> bouquetRepository.findById(itemId).ifPresent(bouquet -> {
+                bouquet.setAddress(request.getAddress());
+                bouquet.setDescription(request.getDescription());
+                bouquet.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case INVITATION -> invitationRepository.findById(itemId).ifPresent(invite -> {
+                invite.setDescription(request.getDescription());
+                invite.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                invite.setDuration(request.getDuration());
+            });
+            case VIDEO -> videoRepository.findById(itemId).ifPresent(video -> {
+                video.setAddress(request.getAddress());
+                video.setDescription(request.getDescription());
+                video.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+        }
     }
+
 
     // 5. 삭제
     public void delete(List<Long> itemIds) {
