@@ -2,12 +2,13 @@ package ready_to_marry.catalogservice.item.dto.request;
 
 import lombok.Getter;
 import java.util.List;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 @Getter
 public class ItemRegisterRequest {
     private Long partnerId;
     private String category;
-    private String field;
+    private FieldType field;
     private String name;
     private String region;
     private Long price;

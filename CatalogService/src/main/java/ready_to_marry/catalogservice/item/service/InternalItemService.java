@@ -47,7 +47,7 @@ public class InternalItemService {
             InternalItemDTO dto = new InternalItemDTO();
             dto.setItemId(item.getItemId());
             dto.setCategory(item.getCategory());
-            dto.setField(item.getField());
+            dto.setField(item.getField().getLabel());
             dto.setName(item.getName());
             dto.setRegion(item.getRegion());
             dto.setPrice(item.getPrice());
@@ -103,7 +103,7 @@ public class InternalItemService {
 
         // 3. field별 상세 테이블 분기 저장
         switch (request.getField()) {
-            case "웨딩홀" -> weddingHallRepository.save(
+            case WEDDING_HALL -> weddingHallRepository.save(
                     WeddingHall.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -113,7 +113,7 @@ public class InternalItemService {
                             .descriptionImageUrl(request.getDescriptionImageUrl())
                             .build()
             );
-            case "스튜디오" -> studioRepository.save(
+            case STUDIO -> studioRepository.save(
                     Studio.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -121,7 +121,7 @@ public class InternalItemService {
                             .descriptionImageUrl(request.getDescriptionImageUrl())
                             .build()
             );
-            case "드레스" -> dressRepository.save(
+            case DRESS -> dressRepository.save(
                     Dress.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -129,7 +129,7 @@ public class InternalItemService {
                             .descriptionImageUrl(request.getDescriptionImageUrl())
                             .build()
             );
-            case "메이크업" -> makeupRepository.save(
+            case MAKEUP -> makeupRepository.save(
                     Makeup.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -137,7 +137,7 @@ public class InternalItemService {
                             .descriptionImageUrl(request.getDescriptionImageUrl())
                             .build()
             );
-            case "부케" -> bouquetRepository.save(
+            case BOUQUET -> bouquetRepository.save(
                     Bouquet.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -145,7 +145,7 @@ public class InternalItemService {
                             .descriptionImageUrl(request.getDescriptionImageUrl())
                             .build()
             );
-            case "청첩장" -> invitationRepository.save(
+            case INVITATION -> invitationRepository.save(
                     Invitation.builder()
                             .item(item)
                             .description(request.getDescription())
@@ -153,7 +153,7 @@ public class InternalItemService {
                             .duration(request.getDuration())
                             .build()
             );
-            case "촬영" -> videoRepository.save(
+            case VIDEO -> videoRepository.save(
                     Video.builder()
                             .item(item)
                             .address(request.getAddress())
@@ -200,13 +200,13 @@ public class InternalItemService {
                     .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
             switch (item.getField()) {
-                case "웨딩홀" -> weddingHallRepository.deleteById(itemId);
-                case "스튜디오" -> studioRepository.deleteById(itemId);
-                case "드레스" -> dressRepository.deleteById(itemId);
-                case "메이크업" -> makeupRepository.deleteById(itemId);
-                case "부케" -> bouquetRepository.deleteById(itemId);
-                case "청첩장" -> invitationRepository.deleteById(itemId);
-                case "촬영" -> videoRepository.deleteById(itemId);
+                case WEDDING_HALL -> weddingHallRepository.deleteById(itemId);
+                case STUDIO -> studioRepository.deleteById(itemId);
+                case DRESS -> dressRepository.deleteById(itemId);
+                case MAKEUP -> makeupRepository.deleteById(itemId);
+                case BOUQUET -> bouquetRepository.deleteById(itemId);
+                case INVITATION -> invitationRepository.deleteById(itemId);
+                case VIDEO -> videoRepository.deleteById(itemId);
                 default -> throw new IllegalArgumentException("Unknown field: " + item.getField());
             }
         }
