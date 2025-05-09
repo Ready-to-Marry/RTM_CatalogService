@@ -26,10 +26,11 @@ public class GlobalExceptionHandler {
                 .map(e -> new ErrorDetail(e.getField(), e.getDefaultMessage()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity
-                .badRequest()
-                .body(ApiResponse.error(1001, "Validation failed", errors));
+        return ResponseEntity.ok(
+                ApiResponse.error(1001, "Validation failed", errors)
+        );
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleOther(Exception ex) {
