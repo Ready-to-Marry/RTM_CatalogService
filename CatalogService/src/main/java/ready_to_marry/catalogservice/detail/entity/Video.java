@@ -13,7 +13,7 @@ public class Video {
     @MapsId @JoinColumn(name = "item_id")
     private Item item;
 
-    private String region;
+    private String address;
     private String description;
     private String descriptionImageUrl;
 }

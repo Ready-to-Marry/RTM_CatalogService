@@ -32,16 +32,4 @@ public class ApiResponse<T> {
         res.errors = errors;
         return res;
     }
-
-    // Getters & Setters
-    public int getCode() { return code; }
-    public String getMessage() { return message; }
-    public T getData() { return data; }
-    public Meta getMeta() { return meta; }
-    public List<ErrorDetail> getErrors() { return errors; }
-    public void setCode(int code) { this.code = code; }
-    public void setMessage(String message) { this.message = message; }
-    public void setData(T data) { this.data = data; }
-    public void setMeta(Meta meta) { this.meta = meta; }
-    public void setErrors(List<ErrorDetail> errors) { this.errors = errors; }
 }

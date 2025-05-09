@@ -31,7 +31,7 @@ public class VideoDetailService implements DetailService {
                 .category(item.getCategory())
                 .field(item.getField())
                 .name(item.getName())
-                .region(video.getRegion())
+                .region(video.getAddress())
                 .price(item.getPrice())
                 .thumbnailUrl(item.getThumbnailUrl())
                 .styles(styles)
