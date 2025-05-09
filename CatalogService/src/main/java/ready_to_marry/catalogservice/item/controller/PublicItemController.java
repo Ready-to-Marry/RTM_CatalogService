@@ -7,7 +7,7 @@ import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.service.PublicItemService;
 
 @RestController
-@RequestMapping("/catalog-service/items")
+@RequestMapping("/items")
 @RequiredArgsConstructor
 public class PublicItemController {
     private final PublicItemService service;

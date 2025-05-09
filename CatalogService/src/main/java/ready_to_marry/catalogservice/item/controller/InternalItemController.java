@@ -9,7 +9,7 @@ import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.service.InternalItemService;
 
 @RestController
-@RequestMapping("/catalog-service/internal/items")
+@RequestMapping("/internal/items")
 @RequiredArgsConstructor
 public class InternalItemController {
     private final InternalItemService service;

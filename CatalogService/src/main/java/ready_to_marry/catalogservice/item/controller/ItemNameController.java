@@ -11,7 +11,7 @@ import ready_to_marry.catalogservice.item.repository.ItemRepository;
 import java.util.List;
 
 @RestController
-@RequestMapping("/catalog-service/internal/items")
+@RequestMapping("/internal/items")
 @RequiredArgsConstructor
 public class ItemNameController {
 
