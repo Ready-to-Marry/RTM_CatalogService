@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(405, "지원하지 않는 HTTP 메서드입니다", null));
     }
 
-    // 6. 필수 파라미터 누락
+    // 6. 필수 쿼리 파라미터 누락 (@RequestParam)
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<?>> handleMissingParam(MissingServletRequestParameterException ex) {
         return ResponseEntity
@@ -74,7 +74,15 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(1004, "필수 요청 파라미터가 누락되었습니다: " + ex.getParameterName(), null));
     }
 
-    // 7. 알 수 없는 서버 예외 (최종 fallback)
+    // 7. 필수 요청 헤더 누락 (@RequestHeader)
+    @ExceptionHandler(org.springframework.web.bind.MissingRequestHeaderException.class)
+    public ResponseEntity<ApiResponse<?>> handleMissingHeader(org.springframework.web.bind.MissingRequestHeaderException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(1005, "필수 요청 헤더가 누락되었습니다: " + ex.getHeaderName(), null));
+    }
+
+    // 8. 알 수 없는 서버 예외 (최종 fallback)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleOther(Exception ex) {
         return ResponseEntity
