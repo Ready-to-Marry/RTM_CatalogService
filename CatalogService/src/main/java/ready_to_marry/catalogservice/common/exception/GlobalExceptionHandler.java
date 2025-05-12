@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ready_to_marry.catalogservice.common.dto.ApiResponse;
 import ready_to_marry.catalogservice.common.dto.ErrorDetail;
 
@@ -82,7 +83,19 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(1005, "필수 요청 헤더가 누락되었습니다: " + ex.getHeaderName(), null));
     }
 
-    // 8. 알 수 없는 서버 예외 (최종 fallback)
+    // 8. PathVariable 또는 RequestParam 타입 변환 실패
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<?>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(
+                        1006,
+                        "요청 경로 또는 파라미터의 형식이 잘못되었습니다: '" + ex.getName() + "' 은(는) " + ex.getRequiredType().getSimpleName() + " 타입이어야 합니다.",
+                        null
+                ));
+    }
+
+    // 9. 알 수 없는 서버 예외 (최종 fallback)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleOther(Exception ex) {
         return ResponseEntity
