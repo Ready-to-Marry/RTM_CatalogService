@@ -1,5 +1,6 @@
 package ready_to_marry.catalogservice.item.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,14 @@ public class PartnerItemController {
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> register(
             @RequestHeader("X-Partner-Id") Long partnerId,
-            @RequestBody ItemRegisterRequest request) {
+            @RequestBody @Valid ItemRegisterRequest request) {
         Long itemId = service.register(partnerId, request);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(itemId));
     }
 
     // 2. 수정 -> Partner
     @PatchMapping("/{itemId}")
-    public ApiResponse<?> update(@PathVariable Long itemId, @RequestBody ItemUpdateRequest request) {
+    public ApiResponse<?> update(@PathVariable Long itemId, @RequestBody @Valid ItemUpdateRequest request) {
         service.update(itemId, request);
         return ApiResponse.success(null);
     }
