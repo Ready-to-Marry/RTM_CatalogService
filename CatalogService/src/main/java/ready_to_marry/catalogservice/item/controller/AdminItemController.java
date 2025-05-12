@@ -7,7 +7,7 @@ import ready_to_marry.catalogservice.common.dto.ApiResponse;
 import ready_to_marry.catalogservice.common.dto.Meta;
 import ready_to_marry.catalogservice.item.dto.response.ItemDTO;
 import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
-import ready_to_marry.catalogservice.item.service.InternalItemService;
+import ready_to_marry.catalogservice.item.service.ItemService;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/items/admin")
 @RequiredArgsConstructor
 public class AdminItemController {
-    private final InternalItemService service;
+    private final ItemService service;
 
     // Admin -> 특정 partnerId의 item 목록 조회
     @GetMapping

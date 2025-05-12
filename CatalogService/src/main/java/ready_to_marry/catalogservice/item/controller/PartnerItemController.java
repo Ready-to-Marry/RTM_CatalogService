@@ -8,7 +8,7 @@ import ready_to_marry.catalogservice.common.dto.ApiResponse;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
 import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
-import ready_to_marry.catalogservice.item.service.InternalItemService;
+import ready_to_marry.catalogservice.item.service.ItemService;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PartnerItemController {
 
-    private final InternalItemService service;
+    private final ItemService service;
 
     // 1. 등록 -> Partner
     @PostMapping

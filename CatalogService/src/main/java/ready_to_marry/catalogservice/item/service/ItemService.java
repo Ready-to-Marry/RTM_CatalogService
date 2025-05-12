@@ -23,7 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InternalItemService {
+public class ItemService {
 
     private final ItemRepository itemRepository;
     private final StyleRepository styleRepository;
@@ -38,7 +38,7 @@ public class InternalItemService {
     private final VideoRepository videoRepository;
 
 
-    // 1. 목록 조회
+    // 1. partner_id를 기반으로 Item 목록 조회
     public ItemListResponse listByPartner(Long partnerId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("itemId").descending());
         Page<Item> itemPage = itemRepository.findByPartnerId(partnerId, pageable);
@@ -76,7 +76,7 @@ public class InternalItemService {
         return service.toResponse(item, styles, tags);
     }
 
-    // 3. 등록
+    // 3. Partner가 Item 등록
     public Long register(Long partnerId, ItemRegisterRequest request) {
         Item item = Item.builder()
                 .partnerId(partnerId)  //헤더에서 추출
@@ -166,7 +166,7 @@ public class InternalItemService {
         return item.getItemId();
     }
 
-    // 4. 수정
+    // 4. Partner가 Item 수정
     public void update(Long itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
@@ -236,7 +236,7 @@ public class InternalItemService {
     }
 
 
-    // 5. 삭제
+    // 5. Partner가 Item 삭제
     public void delete(List<Long> itemIds) {
         for (Long itemId : itemIds) {
             Item item = itemRepository.findById(itemId)
@@ -257,5 +257,10 @@ public class InternalItemService {
         tagRepository.deleteByItemIdIn(itemIds);
         styleRepository.deleteByItemIdIn(itemIds);
         itemRepository.deleteAllById(itemIds);
+    }
+
+    // 6. User가 리뷰 조회 시, Item Name 목록 조회
+    public ItemDetailResponse getItemDetails(Long itemId) {
+        return this.detailById(itemId); // 자기 자신 호출 (순환 참조 아님)
     }
 }
