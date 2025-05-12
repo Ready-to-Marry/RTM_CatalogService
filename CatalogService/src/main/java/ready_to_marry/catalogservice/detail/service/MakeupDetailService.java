@@ -8,6 +8,7 @@ import ready_to_marry.catalogservice.detail.entity.Makeup;
 import ready_to_marry.catalogservice.detail.repository.MakeupRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -16,7 +17,9 @@ import java.util.List;
 public class MakeupDetailService implements DetailService {
     private final MakeupRepository repo;
 
-    @Override public String getCategory() { return "makeup"; }
+    @Override public FieldType getField() {
+        return FieldType.MAKEUP;
+    }
 
     @Override
     public ItemDetailResponse toResponse(Item item, List<String> styles, List<String> tags) {

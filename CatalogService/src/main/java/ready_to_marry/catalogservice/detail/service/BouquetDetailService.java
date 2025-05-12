@@ -8,8 +8,11 @@ import ready_to_marry.catalogservice.detail.entity.Bouquet;
 import ready_to_marry.catalogservice.detail.repository.BouquetRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
+
+import static ready_to_marry.catalogservice.item.enums.FieldType.BOUQUET;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +20,8 @@ public class BouquetDetailService implements DetailService {
     private final BouquetRepository bouquetRepository;
 
     @Override
-    public String getCategory() {
-        return "bouquet";
+    public FieldType getField() {
+        return FieldType.BOUQUET;
     }
 
     @Override

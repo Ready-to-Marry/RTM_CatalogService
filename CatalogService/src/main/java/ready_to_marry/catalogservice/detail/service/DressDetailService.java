@@ -7,6 +7,7 @@ import ready_to_marry.catalogservice.detail.entity.Dress;
 import ready_to_marry.catalogservice.detail.repository.DressRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -16,8 +17,8 @@ public class DressDetailService implements DetailService {
     private final DressRepository dressRepository;
 
     @Override
-    public String getCategory() {
-        return "dress";
+    public FieldType getField() {
+        return FieldType.DRESS;
     }
 
     @Override

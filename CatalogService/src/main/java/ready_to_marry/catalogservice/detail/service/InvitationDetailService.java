@@ -8,6 +8,7 @@ import ready_to_marry.catalogservice.detail.entity.Invitation;
 import ready_to_marry.catalogservice.detail.repository.InvitationRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -17,8 +18,8 @@ public class InvitationDetailService implements DetailService {
     private final InvitationRepository invitationRepository;
 
     @Override
-    public String getCategory() {
-        return "invitation";
+    public FieldType getField() {
+        return FieldType.INVITATION;
     }
 
     @Override
@@ -38,7 +39,12 @@ public class InvitationDetailService implements DetailService {
                 .tags(tags)
                 .description(invitation.getDescription())
                 .descriptionImageUrl(invitation.getDescriptionImageUrl())
-                .duration(invitation.getDuration())
+                .videoOrInvitationDetail(
+                        ItemDetailResponse.VideoOrInvitationDetail.builder()
+                                .duration(invitation.getDuration())
+                                .build()
+                )
                 .build();
+
     }
 }

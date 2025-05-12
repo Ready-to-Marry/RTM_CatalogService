@@ -9,8 +9,8 @@ import ready_to_marry.catalogservice.detail.repository.*;
 import ready_to_marry.catalogservice.detail.service.DetailService;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
-import ready_to_marry.catalogservice.item.dto.response.InternalItemDTO;
-import ready_to_marry.catalogservice.item.dto.response.InternalItemListResponse;
+import ready_to_marry.catalogservice.item.dto.response.ItemDTO;
+import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
 import ready_to_marry.catalogservice.item.entity.Style;
@@ -39,15 +39,15 @@ public class InternalItemService {
 
 
     // 1. 목록 조회
-    public InternalItemListResponse listByPartner(Long partnerId, int page, int size) {
+    public ItemListResponse listByPartner(Long partnerId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("itemId").descending());
         Page<Item> itemPage = itemRepository.findByPartnerId(partnerId, pageable);
 
-        List<InternalItemDTO> items = itemPage.stream().map(item -> {
-            InternalItemDTO dto = new InternalItemDTO();
+        List<ItemDTO> items = itemPage.stream().map(item -> {
+            ItemDTO dto = new ItemDTO();
             dto.setItemId(item.getItemId());
             dto.setCategory(item.getCategory());
-            dto.setField(item.getField().getLabel());
+            dto.setField(item.getField());
             dto.setName(item.getName());
             dto.setRegion(item.getRegion());
             dto.setPrice(item.getPrice());
@@ -57,7 +57,7 @@ public class InternalItemService {
             return dto;
         }).toList();
 
-        return new InternalItemListResponse(itemPage.getTotalElements(), page, size, items);
+        return new ItemListResponse(itemPage.getTotalElements(), page, size, items);
     }
 
     // 2. 단건 상세 조회
@@ -66,9 +66,9 @@ public class InternalItemService {
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
         DetailService service = detailServices.stream()
-                .filter(d -> d.getCategory().equals(item.getCategory()))
+                .filter(d -> d.getField().equals(item.getField()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("No detail handler for: " + item.getCategory()));
+                .orElseThrow(() -> new NotFoundException("No detail handler for: " + item.getField()));
 
         List<String> tags = tagRepository.findByItemId(itemId).stream().map(Tag::getTag).toList();
         List<String> styles = styleRepository.findByItemId(itemId).stream().map(Style::getStyle).toList();
@@ -80,7 +80,7 @@ public class InternalItemService {
     public Long register(ItemRegisterRequest request) {
         // 1. 공통 Item 저장
         Item item = Item.builder()
-                .partnerId(request.getPartnerId())
+                .partnerId(request.getPartnerId()) //헤더에서 추출
                 .category(request.getCategory())
                 .field(request.getField())
                 .name(request.getName())

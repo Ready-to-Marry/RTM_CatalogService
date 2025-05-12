@@ -7,6 +7,7 @@ import ready_to_marry.catalogservice.detail.entity.Studio;
 import ready_to_marry.catalogservice.detail.repository.StudioRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -16,8 +17,8 @@ public class StudioDetailService implements DetailService {
     private final StudioRepository studioRepository;
 
     @Override
-    public String getCategory() {
-        return "studio";
+    public FieldType getField() {
+        return FieldType.STUDIO;
     }
 
     @Override

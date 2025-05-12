@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @Builder
-public class InternalItemListResponse {
+public class ItemListResponse {
     private long total;
     private int page;
     private int size;
-    private List<InternalItemDTO> items;
+    private List<ItemDTO> items;
 }

@@ -12,6 +12,7 @@ import ready_to_marry.catalogservice.item.service.PublicItemService;
 public class PublicItemController {
     private final PublicItemService service;
 
+    // 상세 조회 => User, Admin, Partner
     @GetMapping("/{itemId}/details")
     public ApiResponse<ItemDetailResponse> detail(@PathVariable Long itemId) {
         return ApiResponse.success(service.getItemDetails(itemId));
