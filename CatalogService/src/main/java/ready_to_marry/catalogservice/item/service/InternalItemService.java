@@ -77,10 +77,9 @@ public class InternalItemService {
     }
 
     // 3. 등록
-    public Long register(ItemRegisterRequest request) {
-        // 1. 공통 Item 저장
+    public Long register(Long partnerId, ItemRegisterRequest request) {
         Item item = Item.builder()
-                .partnerId(request.getPartnerId()) //헤더에서 추출
+                .partnerId(partnerId)  //헤더에서 추출
                 .category(request.getCategory())
                 .field(request.getField())
                 .name(request.getName())

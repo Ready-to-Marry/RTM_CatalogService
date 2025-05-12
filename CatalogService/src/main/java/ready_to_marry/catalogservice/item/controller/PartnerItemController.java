@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ready_to_marry.catalogservice.common.dto.ApiResponse;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
+import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
 import ready_to_marry.catalogservice.item.service.InternalItemService;
 
 import java.util.List;
@@ -20,10 +21,11 @@ public class PartnerItemController {
 
     // 1. 등록 -> Partner
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> register(@RequestBody ItemRegisterRequest request) {
-        Long itemId = service.register(request);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(itemId));
+    public ResponseEntity<ApiResponse<Long>> register(
+            @RequestHeader("X-Partner-Id") Long partnerId,
+            @RequestBody ItemRegisterRequest request) {
+        Long itemId = service.register(partnerId, request);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(itemId));
     }
 
     // 2. 수정 -> Partner
@@ -35,10 +37,21 @@ public class PartnerItemController {
 
     // 3. 삭제 -> Partner
     @DeleteMapping("/{itemId}")
-    public ApiResponse<?> delete(@RequestBody List<Long> itemIds) {
-        service.delete(itemIds);
+    public ApiResponse<?> delete(@PathVariable Long itemId) {
+        service.delete(List.of(itemId));
         return ApiResponse.success(null);
     }
 
+
     // 4. Partner -> Header에서 partnerId로 item 목록 조회
+    @GetMapping
+    public ResponseEntity<ApiResponse<ItemListResponse>> getPartnerItemList(
+            @RequestHeader("X-Partner-Id") Long partnerId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        ItemListResponse response = service.listByPartner(partnerId, page, size);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
 }
