@@ -13,7 +13,7 @@ import ready_to_marry.catalogservice.item.service.InternalItemService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/items")
+@RequestMapping("/items/partners")
 @RequiredArgsConstructor
 public class PartnerItemController {
 
