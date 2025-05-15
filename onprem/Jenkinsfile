@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-	    SERVICE_REPO_NAME = 'RTM_Catalog.git'
+	    SERVICE_REPO_NAME = 'RTM_CatalogService.git'
 	    DOCKER_IMAGE = 'hyundooboo/rtm-catalog-service'
 	    SERVICE_NAME = 'catalog-service'
 	    SPRING_DATASOURCE_URL = credentials('postgres-url')
