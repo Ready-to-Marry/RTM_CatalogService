@@ -3,6 +3,7 @@ package ready_to_marry.catalogservice.detail.service;
 
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface DetailService {
      * 이 서비스가 처리할 카테고리명을 반환합니다.
      * 예: "wedding_hall", "studio", "dress", ...
      */
-    String getCategory();
+    FieldType getField();
 
     /**
      * 공통 Item 엔티티 + 스타일/태그 리스트 → 카테고리별 상세 DTO로 매핑합니다.

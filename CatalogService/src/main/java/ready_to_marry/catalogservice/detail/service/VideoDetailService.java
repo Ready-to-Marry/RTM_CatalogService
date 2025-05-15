@@ -8,6 +8,7 @@ import ready_to_marry.catalogservice.detail.entity.Video;
 import ready_to_marry.catalogservice.detail.repository.VideoRepository;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
+import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
@@ -17,8 +18,8 @@ public class VideoDetailService implements DetailService {
     private final VideoRepository videoRepository;
 
     @Override
-    public String getCategory() {
-        return "video";
+    public FieldType getField() {
+        return FieldType.VIDEO;
     }
 
     @Override

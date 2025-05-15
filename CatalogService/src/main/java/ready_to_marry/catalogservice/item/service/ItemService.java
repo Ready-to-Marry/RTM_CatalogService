@@ -9,8 +9,8 @@ import ready_to_marry.catalogservice.detail.repository.*;
 import ready_to_marry.catalogservice.detail.service.DetailService;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
-import ready_to_marry.catalogservice.item.dto.response.InternalItemDTO;
-import ready_to_marry.catalogservice.item.dto.response.InternalItemListResponse;
+import ready_to_marry.catalogservice.item.dto.response.ItemDTO;
+import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
 import ready_to_marry.catalogservice.item.entity.Style;
@@ -23,7 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InternalItemService {
+public class ItemService {
 
     private final ItemRepository itemRepository;
     private final StyleRepository styleRepository;
@@ -38,16 +38,16 @@ public class InternalItemService {
     private final VideoRepository videoRepository;
 
 
-    // 1. 목록 조회
-    public InternalItemListResponse listByPartner(Long partnerId, int page, int size) {
+    // 1. partner_id를 기반으로 Item 목록 조회
+    public ItemListResponse listByPartner(Long partnerId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("itemId").descending());
         Page<Item> itemPage = itemRepository.findByPartnerId(partnerId, pageable);
 
-        List<InternalItemDTO> items = itemPage.stream().map(item -> {
-            InternalItemDTO dto = new InternalItemDTO();
+        List<ItemDTO> items = itemPage.stream().map(item -> {
+            ItemDTO dto = new ItemDTO();
             dto.setItemId(item.getItemId());
             dto.setCategory(item.getCategory());
-            dto.setField(item.getField().getLabel());
+            dto.setField(item.getField());
             dto.setName(item.getName());
             dto.setRegion(item.getRegion());
             dto.setPrice(item.getPrice());
@@ -57,7 +57,7 @@ public class InternalItemService {
             return dto;
         }).toList();
 
-        return new InternalItemListResponse(itemPage.getTotalElements(), page, size, items);
+        return new ItemListResponse(itemPage.getTotalElements(), page, size, items);
     }
 
     // 2. 단건 상세 조회
@@ -66,9 +66,9 @@ public class InternalItemService {
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
         DetailService service = detailServices.stream()
-                .filter(d -> d.getCategory().equals(item.getCategory()))
+                .filter(d -> d.getField().equals(item.getField()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException("No detail handler for: " + item.getCategory()));
+                .orElseThrow(() -> new NotFoundException("No detail handler for: " + item.getField()));
 
         List<String> tags = tagRepository.findByItemId(itemId).stream().map(Tag::getTag).toList();
         List<String> styles = styleRepository.findByItemId(itemId).stream().map(Style::getStyle).toList();
@@ -76,11 +76,10 @@ public class InternalItemService {
         return service.toResponse(item, styles, tags);
     }
 
-    // 3. 등록
-    public Long register(ItemRegisterRequest request) {
-        // 1. 공통 Item 저장
+    // 3. Partner가 Item 등록
+    public Long register(Long partnerId, ItemRegisterRequest request) {
         Item item = Item.builder()
-                .partnerId(request.getPartnerId())
+                .partnerId(partnerId)  //헤더에서 추출
                 .category(request.getCategory())
                 .field(request.getField())
                 .name(request.getName())
@@ -167,33 +166,77 @@ public class InternalItemService {
         return item.getItemId();
     }
 
-
-    // 4. 수정
+    // 4. Partner가 Item 수정
     public void update(Long itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
+        // 1. 기본 item 정보 수정
         item.setName(request.getName());
         item.setPrice(request.getPrice());
         item.setRegion(request.getRegion());
         item.setThumbnailUrl(request.getThumbnailUrl());
         itemRepository.save(item);
 
+        // 2. 스타일/태그 재정의
         tagRepository.deleteByItemId(itemId);
         styleRepository.deleteByItemId(itemId);
 
         List<Tag> tags = request.getTags().stream()
                 .map(tag -> new Tag(null, itemId, tag))
                 .toList();
+
         List<Style> styles = request.getStyles().stream()
                 .map(style -> new Style(null, itemId, style))
                 .toList();
 
         tagRepository.saveAll(tags);
         styleRepository.saveAll(styles);
+
+        // 3. 상세 테이블 분기 업데이트 (item.getField()는 enum FieldType)
+        switch (item.getField()) {
+            case WEDDING_HALL -> weddingHallRepository.findById(itemId).ifPresent(hall -> {
+                hall.setAddress(request.getAddress());
+                hall.setMealPrice(request.getMealPrice());
+                hall.setCapacity(request.getCapacity());
+                hall.setParkingCapacity(request.getParkingCapacity());
+                hall.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case STUDIO -> studioRepository.findById(itemId).ifPresent(studio -> {
+                studio.setAddress(request.getAddress());
+                studio.setDescription(request.getDescription());
+                studio.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case DRESS -> dressRepository.findById(itemId).ifPresent(dress -> {
+                dress.setAddress(request.getAddress());
+                dress.setDescription(request.getDescription());
+                dress.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case MAKEUP -> makeupRepository.findById(itemId).ifPresent(makeup -> {
+                makeup.setAddress(request.getAddress());
+                makeup.setDescription(request.getDescription());
+                makeup.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case BOUQUET -> bouquetRepository.findById(itemId).ifPresent(bouquet -> {
+                bouquet.setAddress(request.getAddress());
+                bouquet.setDescription(request.getDescription());
+                bouquet.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+            case INVITATION -> invitationRepository.findById(itemId).ifPresent(invite -> {
+                invite.setDescription(request.getDescription());
+                invite.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                invite.setDuration(request.getDuration());
+            });
+            case VIDEO -> videoRepository.findById(itemId).ifPresent(video -> {
+                video.setAddress(request.getAddress());
+                video.setDescription(request.getDescription());
+                video.setDescriptionImageUrl(request.getDescriptionImageUrl());
+            });
+        }
     }
 
-    // 5. 삭제
+
+    // 5. Partner가 Item 삭제
     public void delete(List<Long> itemIds) {
         for (Long itemId : itemIds) {
             Item item = itemRepository.findById(itemId)
@@ -214,5 +257,10 @@ public class InternalItemService {
         tagRepository.deleteByItemIdIn(itemIds);
         styleRepository.deleteByItemIdIn(itemIds);
         itemRepository.deleteAllById(itemIds);
+    }
+
+    // 6. User가 리뷰 조회 시, Item Name 목록 조회
+    public ItemDetailResponse getItemDetails(Long itemId) {
+        return this.detailById(itemId); // 자기 자신 호출 (순환 참조 아님)
     }
 }

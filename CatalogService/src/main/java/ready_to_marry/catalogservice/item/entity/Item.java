@@ -2,6 +2,7 @@ package ready_to_marry.catalogservice.item.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ready_to_marry.catalogservice.item.enums.CategoryType;
 import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,9 @@ public class Item {
     private Long itemId;
 
     private Long partnerId;
-    private String category;
+
+    @Enumerated(EnumType.STRING)
+    private CategoryType category;
 
     @Enumerated(EnumType.STRING)
     private FieldType field;
