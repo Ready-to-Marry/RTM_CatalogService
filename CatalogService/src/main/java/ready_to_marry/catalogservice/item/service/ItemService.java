@@ -3,6 +3,8 @@ package ready_to_marry.catalogservice.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import ready_to_marry.catalogservice.common.exception.ErrorCode;
+import ready_to_marry.catalogservice.common.exception.InfrastructureException;
 import ready_to_marry.catalogservice.common.exception.NotFoundException;
 import ready_to_marry.catalogservice.detail.entity.*;
 import ready_to_marry.catalogservice.detail.repository.*;
@@ -37,8 +39,6 @@ public class ItemService {
     private final InvitationRepository invitationRepository;
     private final VideoRepository videoRepository;
 
-
-    // 1. partner_id를 기반으로 Item 목록 조회
     public ItemListResponse listByPartner(Long partnerId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("itemId").descending());
         Page<Item> itemPage = itemRepository.findByPartnerId(partnerId, pageable);
@@ -60,7 +60,6 @@ public class ItemService {
         return new ItemListResponse(itemPage.getTotalElements(), page, size, items);
     }
 
-    // 2. 단건 상세 조회
     public ItemDetailResponse detailById(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
@@ -76,191 +75,192 @@ public class ItemService {
         return service.toResponse(item, styles, tags);
     }
 
-    // 3. Partner가 Item 등록
     public Long register(Long partnerId, ItemRegisterRequest request) {
-        Item item = Item.builder()
-                .partnerId(partnerId)  //헤더에서 추출
-                .category(request.getCategory())
-                .field(request.getField())
-                .name(request.getName())
-                .region(request.getRegion())
-                .price(request.getPrice())
-                .thumbnailUrl(request.getThumbnailUrl())
-                .build();
-        itemRepository.save(item);
+        try {
+            Item item = Item.builder()
+                    .partnerId(partnerId)
+                    .category(request.getCategory())
+                    .field(request.getField())
+                    .name(request.getName())
+                    .region(request.getRegion())
+                    .price(request.getPrice())
+                    .thumbnailUrl(request.getThumbnailUrl())
+                    .build();
+            itemRepository.save(item);
 
-        // 2. Style & Tag 저장
-        List<Style> styles = request.getStyles().stream()
-                .map(style -> new Style(null, item.getItemId(), style))
-                .toList();
-        List<Tag> tags = request.getTags().stream()
-                .map(tag -> new Tag(null, item.getItemId(), tag))
-                .toList();
+            List<Style> styles = request.getStyles().stream()
+                    .map(style -> new Style(null, item.getItemId(), style))
+                    .toList();
+            List<Tag> tags = request.getTags().stream()
+                    .map(tag -> new Tag(null, item.getItemId(), tag))
+                    .toList();
 
-        styleRepository.saveAll(styles);
-        tagRepository.saveAll(tags);
+            styleRepository.saveAll(styles);
+            tagRepository.saveAll(tags);
 
-        // 3. field별 상세 테이블 분기 저장
-        switch (request.getField()) {
-            case WEDDING_HALL -> weddingHallRepository.save(
-                    WeddingHall.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .mealPrice(request.getMealPrice())
-                            .capacity(request.getCapacity())
-                            .parkingCapacity(request.getParkingCapacity())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            case STUDIO -> studioRepository.save(
-                    Studio.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            case DRESS -> dressRepository.save(
-                    Dress.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            case MAKEUP -> makeupRepository.save(
-                    Makeup.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            case BOUQUET -> bouquetRepository.save(
-                    Bouquet.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            case INVITATION -> invitationRepository.save(
-                    Invitation.builder()
-                            .item(item)
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .duration(request.getDuration())
-                            .build()
-            );
-            case VIDEO -> videoRepository.save(
-                    Video.builder()
-                            .item(item)
-                            .address(request.getAddress())
-                            .description(request.getDescription())
-                            .descriptionImageUrl(request.getDescriptionImageUrl())
-                            .build()
-            );
-            default -> throw new IllegalArgumentException("Unknown category: " + request.getCategory());
+            switch (request.getField()) {
+                case WEDDING_HALL -> weddingHallRepository.save(
+                        WeddingHall.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .mealPrice(request.getMealPrice())
+                                .capacity(request.getCapacity())
+                                .parkingCapacity(request.getParkingCapacity())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                case STUDIO -> studioRepository.save(
+                        Studio.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                case DRESS -> dressRepository.save(
+                        Dress.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                case MAKEUP -> makeupRepository.save(
+                        Makeup.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                case BOUQUET -> bouquetRepository.save(
+                        Bouquet.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                case INVITATION -> invitationRepository.save(
+                        Invitation.builder()
+                                .item(item)
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .duration(request.getDuration())
+                                .build()
+                );
+                case VIDEO -> videoRepository.save(
+                        Video.builder()
+                                .item(item)
+                                .address(request.getAddress())
+                                .description(request.getDescription())
+                                .descriptionImageUrl(request.getDescriptionImageUrl())
+                                .build()
+                );
+                default -> throw new IllegalArgumentException("Unknown category: " + request.getCategory());
+            }
+
+            return item.getItemId();
+        } catch (Exception e) {
+            throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
         }
-
-        return item.getItemId();
     }
 
-    // 4. Partner가 Item 수정
     public void update(Long itemId, ItemUpdateRequest request) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
-        // 1. 기본 item 정보 수정
-        item.setName(request.getName());
-        item.setPrice(request.getPrice());
-        item.setRegion(request.getRegion());
-        item.setThumbnailUrl(request.getThumbnailUrl());
-        itemRepository.save(item);
+        try {
+            item.setName(request.getName());
+            item.setPrice(request.getPrice());
+            item.setRegion(request.getRegion());
+            item.setThumbnailUrl(request.getThumbnailUrl());
+            itemRepository.save(item);
 
-        // 2. 스타일/태그 재정의
-        tagRepository.deleteByItemId(itemId);
-        styleRepository.deleteByItemId(itemId);
+            tagRepository.deleteByItemId(itemId);
+            styleRepository.deleteByItemId(itemId);
 
-        List<Tag> tags = request.getTags().stream()
-                .map(tag -> new Tag(null, itemId, tag))
-                .toList();
+            List<Tag> tags = request.getTags().stream()
+                    .map(tag -> new Tag(null, itemId, tag))
+                    .toList();
+            List<Style> styles = request.getStyles().stream()
+                    .map(style -> new Style(null, itemId, style))
+                    .toList();
 
-        List<Style> styles = request.getStyles().stream()
-                .map(style -> new Style(null, itemId, style))
-                .toList();
-
-        tagRepository.saveAll(tags);
-        styleRepository.saveAll(styles);
-
-        // 3. 상세 테이블 분기 업데이트 (item.getField()는 enum FieldType)
-        switch (item.getField()) {
-            case WEDDING_HALL -> weddingHallRepository.findById(itemId).ifPresent(hall -> {
-                hall.setAddress(request.getAddress());
-                hall.setMealPrice(request.getMealPrice());
-                hall.setCapacity(request.getCapacity());
-                hall.setParkingCapacity(request.getParkingCapacity());
-                hall.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-            case STUDIO -> studioRepository.findById(itemId).ifPresent(studio -> {
-                studio.setAddress(request.getAddress());
-                studio.setDescription(request.getDescription());
-                studio.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-            case DRESS -> dressRepository.findById(itemId).ifPresent(dress -> {
-                dress.setAddress(request.getAddress());
-                dress.setDescription(request.getDescription());
-                dress.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-            case MAKEUP -> makeupRepository.findById(itemId).ifPresent(makeup -> {
-                makeup.setAddress(request.getAddress());
-                makeup.setDescription(request.getDescription());
-                makeup.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-            case BOUQUET -> bouquetRepository.findById(itemId).ifPresent(bouquet -> {
-                bouquet.setAddress(request.getAddress());
-                bouquet.setDescription(request.getDescription());
-                bouquet.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-            case INVITATION -> invitationRepository.findById(itemId).ifPresent(invite -> {
-                invite.setDescription(request.getDescription());
-                invite.setDescriptionImageUrl(request.getDescriptionImageUrl());
-                invite.setDuration(request.getDuration());
-            });
-            case VIDEO -> videoRepository.findById(itemId).ifPresent(video -> {
-                video.setAddress(request.getAddress());
-                video.setDescription(request.getDescription());
-                video.setDescriptionImageUrl(request.getDescriptionImageUrl());
-            });
-        }
-    }
-
-
-    // 5. Partner가 Item 삭제
-    public void delete(List<Long> itemIds) {
-        for (Long itemId : itemIds) {
-            Item item = itemRepository.findById(itemId)
-                    .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
+            tagRepository.saveAll(tags);
+            styleRepository.saveAll(styles);
 
             switch (item.getField()) {
-                case WEDDING_HALL -> weddingHallRepository.deleteById(itemId);
-                case STUDIO -> studioRepository.deleteById(itemId);
-                case DRESS -> dressRepository.deleteById(itemId);
-                case MAKEUP -> makeupRepository.deleteById(itemId);
-                case BOUQUET -> bouquetRepository.deleteById(itemId);
-                case INVITATION -> invitationRepository.deleteById(itemId);
-                case VIDEO -> videoRepository.deleteById(itemId);
-                default -> throw new IllegalArgumentException("Unknown field: " + item.getField());
+                case WEDDING_HALL -> weddingHallRepository.findById(itemId).ifPresent(hall -> {
+                    hall.setAddress(request.getAddress());
+                    hall.setMealPrice(request.getMealPrice());
+                    hall.setCapacity(request.getCapacity());
+                    hall.setParkingCapacity(request.getParkingCapacity());
+                    hall.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
+                case STUDIO -> studioRepository.findById(itemId).ifPresent(studio -> {
+                    studio.setAddress(request.getAddress());
+                    studio.setDescription(request.getDescription());
+                    studio.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
+                case DRESS -> dressRepository.findById(itemId).ifPresent(dress -> {
+                    dress.setAddress(request.getAddress());
+                    dress.setDescription(request.getDescription());
+                    dress.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
+                case MAKEUP -> makeupRepository.findById(itemId).ifPresent(makeup -> {
+                    makeup.setAddress(request.getAddress());
+                    makeup.setDescription(request.getDescription());
+                    makeup.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
+                case BOUQUET -> bouquetRepository.findById(itemId).ifPresent(bouquet -> {
+                    bouquet.setAddress(request.getAddress());
+                    bouquet.setDescription(request.getDescription());
+                    bouquet.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
+                case INVITATION -> invitationRepository.findById(itemId).ifPresent(invite -> {
+                    invite.setDescription(request.getDescription());
+                    invite.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                    invite.setDuration(request.getDuration());
+                });
+                case VIDEO -> videoRepository.findById(itemId).ifPresent(video -> {
+                    video.setAddress(request.getAddress());
+                    video.setDescription(request.getDescription());
+                    video.setDescriptionImageUrl(request.getDescriptionImageUrl());
+                });
             }
+        } catch (Exception e) {
+            throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
         }
-
-        tagRepository.deleteByItemIdIn(itemIds);
-        styleRepository.deleteByItemIdIn(itemIds);
-        itemRepository.deleteAllById(itemIds);
     }
 
-    // 6. User가 리뷰 조회 시, Item Name 목록 조회
+    public void delete(List<Long> itemIds) {
+        try {
+            for (Long itemId : itemIds) {
+                Item item = itemRepository.findById(itemId)
+                        .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
+
+                switch (item.getField()) {
+                    case WEDDING_HALL -> weddingHallRepository.deleteById(itemId);
+                    case STUDIO -> studioRepository.deleteById(itemId);
+                    case DRESS -> dressRepository.deleteById(itemId);
+                    case MAKEUP -> makeupRepository.deleteById(itemId);
+                    case BOUQUET -> bouquetRepository.deleteById(itemId);
+                    case INVITATION -> invitationRepository.deleteById(itemId);
+                    case VIDEO -> videoRepository.deleteById(itemId);
+                    default -> throw new IllegalArgumentException("Unknown field: " + item.getField());
+                }
+            }
+
+            tagRepository.deleteByItemIdIn(itemIds);
+            styleRepository.deleteByItemIdIn(itemIds);
+            itemRepository.deleteAllById(itemIds);
+        } catch (Exception e) {
+            throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
+        }
+    }
+
     public ItemDetailResponse getItemDetails(Long itemId) {
-        return this.detailById(itemId); // 자기 자신 호출 (순환 참조 아님)
+        return this.detailById(itemId);
     }
 }
