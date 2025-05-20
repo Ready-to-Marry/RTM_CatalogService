@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import ready_to_marry.catalogservice.item.dto.response.ItemKafkaDto;
+import ready_to_marry.catalogservice.item.dto.response.ItemKafkaDTO;
 
 @RequiredArgsConstructor
 @Service
@@ -14,7 +14,7 @@ public class ItemKafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public void sendItem(String topic, ItemKafkaDto dto) {
+    public void sendItem(String topic, ItemKafkaDTO dto) {
         try {
             String json = objectMapper.writeValueAsString(dto);
             kafkaTemplate.send(topic, json);

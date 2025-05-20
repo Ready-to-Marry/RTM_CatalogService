@@ -11,10 +11,7 @@ import ready_to_marry.catalogservice.detail.repository.*;
 import ready_to_marry.catalogservice.detail.service.DetailService;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
-import ready_to_marry.catalogservice.item.dto.response.ItemDTO;
-import ready_to_marry.catalogservice.item.dto.response.ItemKafkaDto;
-import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
-import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
+import ready_to_marry.catalogservice.item.dto.response.*;
 import ready_to_marry.catalogservice.item.entity.Item;
 import ready_to_marry.catalogservice.item.entity.Style;
 import ready_to_marry.catalogservice.item.entity.Tag;
@@ -162,7 +159,22 @@ public class ItemService {
                 default -> throw new IllegalArgumentException("Unknown category: " + request.getCategory());
             }
 
-            itemKafkaProducer.sendItem("items", ItemKafkaDto.from(item, request));
+            ItemKafkaDTO itemKafkaDto = ItemKafkaDTO.builder()
+                    .operation("create")
+                    .itemId(item.getItemId())
+                    .partnerId(item.getPartnerId())
+                    .category(item.getCategory().name())
+                    .field(item.getField().name())
+                    .name(item.getName())
+                    .created_at(item.getCreatedAt().toString())
+                    .region(item.getRegion())
+                    .price(item.getPrice())
+                    .thumbnail_url(item.getThumbnailUrl())
+                    .tags(request.getTags())
+                    .styles(request.getStyles())
+                    .build();
+
+            itemKafkaProducer.sendItem("items", itemKafkaDto);
 
             return item.getItemId();
         } catch (Exception e) {
@@ -234,6 +246,23 @@ public class ItemService {
                 });
             }
 
+            ItemKafkaDTO itemKafkaDto = ItemKafkaDTO.builder()
+                    .operation("update")
+                    .itemId(item.getItemId())
+                    .partnerId(item.getPartnerId())
+                    .category(item.getCategory().name())
+                    .field(item.getField().name())
+                    .name(item.getName())
+                    .created_at(item.getCreatedAt().toString())
+                    .region(item.getRegion())
+                    .price(item.getPrice())
+                    .thumbnail_url(item.getThumbnailUrl())
+                    .tags(request.getTags())
+                    .styles(request.getStyles())
+                    .build();
+
+            itemKafkaProducer.sendItem("items", itemKafkaDto);
+
         } catch (Exception e) {
             throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
         }
@@ -256,10 +285,14 @@ public class ItemService {
                     default -> throw new IllegalArgumentException("Unknown field: " + item.getField());
                 }
             }
-
             tagRepository.deleteByItemIdIn(itemIds);
             styleRepository.deleteByItemIdIn(itemIds);
             itemRepository.deleteAllById(itemIds);
+            ItemKafkaDTO deleteDto = ItemKafkaDTO.builder()
+                    .operation("delete")
+                    .itemIds(itemIds)
+                    .build();
+            itemKafkaProducer.sendItem("items", deleteDto);
         } catch (Exception e) {
             throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
         }
