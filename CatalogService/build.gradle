@@ -58,6 +58,9 @@ dependencies {
 
     // H2 Database (개발/테스트용 인메모리 DB)
     runtimeOnly 'com.h2database:h2'
+
+    // kafka 의존성
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 

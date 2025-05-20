@@ -37,9 +37,9 @@ public class PartnerItemController {
     }
 
     // 3. 삭제 -> Partner
-    @DeleteMapping("/{itemId}")
-    public ApiResponse<?> delete(@PathVariable Long itemId) {
-        service.delete(List.of(itemId));
+    @DeleteMapping()
+    public ApiResponse<?> delete(@RequestBody List<Long> itemIds) {
+        service.delete(itemIds);
         return ApiResponse.success(null);
     }
 
