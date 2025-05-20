@@ -12,6 +12,7 @@ import ready_to_marry.catalogservice.detail.service.DetailService;
 import ready_to_marry.catalogservice.item.dto.request.ItemRegisterRequest;
 import ready_to_marry.catalogservice.item.dto.request.ItemUpdateRequest;
 import ready_to_marry.catalogservice.item.dto.response.ItemDTO;
+import ready_to_marry.catalogservice.item.dto.response.ItemKafkaDto;
 import ready_to_marry.catalogservice.item.dto.response.ItemListResponse;
 import ready_to_marry.catalogservice.item.dto.response.ItemDetailResponse;
 import ready_to_marry.catalogservice.item.entity.Item;
@@ -38,6 +39,7 @@ public class ItemService {
     private final BouquetRepository bouquetRepository;
     private final InvitationRepository invitationRepository;
     private final VideoRepository videoRepository;
+    private final ItemKafkaProducer itemKafkaProducer;
 
     public ItemListResponse listByPartner(Long partnerId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("itemId").descending());
@@ -160,6 +162,8 @@ public class ItemService {
                 default -> throw new IllegalArgumentException("Unknown category: " + request.getCategory());
             }
 
+            itemKafkaProducer.sendItem("items", ItemKafkaDto.from(item, request));
+
             return item.getItemId();
         } catch (Exception e) {
             throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
@@ -229,6 +233,7 @@ public class ItemService {
                     video.setDescriptionImageUrl(request.getDescriptionImageUrl());
                 });
             }
+
         } catch (Exception e) {
             throw new InfrastructureException(ErrorCode.DB_WRITE_FAILURE, e);
         }
