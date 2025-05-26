@@ -25,8 +25,9 @@ public class ItemRegisterRequest {
     @Min(value = 0, message = "가격은 0 이상이어야 합니다.")
     private Long price;
 
-    @NotBlank(message = "썸네일 이미지 URL은 필수입니다.")
+    // 이미지 URL → 이미지 파일로 대체 (S3 업로드로 설정됨)
     private String thumbnailUrl;
+    private String descriptionImageUrl;
 
     @NotNull(message = "태그 목록은 필수입니다.")
     @Size(min = 1, message = "태그는 최소 1개 이상이어야 합니다.")
@@ -42,9 +43,6 @@ public class ItemRegisterRequest {
     @NotBlank(message = "상세 설명은 필수입니다.")
     private String description;
 
-    @NotBlank(message = "설명 이미지 URL은 필수입니다.")
-    private String descriptionImageUrl;
-
     // 웨딩홀 전용
     private Integer mealPrice;
     private Integer capacity;
@@ -53,7 +51,6 @@ public class ItemRegisterRequest {
     // 영상/청첩장 전용
     private Integer duration;
 
-    // 조건부 유효성: 웨딩홀일 때 웨딩홀 필드 필수
     @AssertTrue(message = "웨딩홀 등록 시 식대, 수용 인원, 주차 공간은 필수입니다.")
     public boolean isValidForWeddingHall() {
         if (field == FieldType.WEDDING_HALL) {
@@ -62,7 +59,6 @@ public class ItemRegisterRequest {
         return true;
     }
 
-    // 조건부 유효성: 영상/청첩장일 때 duration 필수
     @AssertTrue(message = "영상/청첩장 등록 시 예상 배송 기간은 필수입니다.")
     public boolean isValidForVideoOrInvitation() {
         if (field == FieldType.VIDEO || field == FieldType.INVITATION) {
