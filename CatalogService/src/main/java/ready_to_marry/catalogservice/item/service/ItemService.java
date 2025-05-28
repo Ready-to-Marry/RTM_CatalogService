@@ -56,9 +56,17 @@ public class ItemService {
             Long itemId = item.getItemId();
             String thumbnailKey = String.format("items/thumbnails/item-%d.jpg", itemId);
             String descriptionKey = String.format("items/details/item-%d-desc.jpg", itemId);
-            String thumbnailUrl = s3Uploader.uploadWithKey(thumbnail, thumbnailKey);
-            String descriptionUrl = s3Uploader.uploadWithKey(descriptionImage, descriptionKey);
-            item.setThumbnailUrl(thumbnailUrl);
+
+            String thumbnailUrl = null;
+            String descriptionUrl = null;
+
+            if (!request.getName().startsWith("더미")) {
+                if (request.getName() != null) {
+                    thumbnailUrl = s3Uploader.uploadWithKey(thumbnail, thumbnailKey);
+                    descriptionUrl = s3Uploader.uploadWithKey(descriptionImage, descriptionKey);
+                    item.setThumbnailUrl(thumbnailUrl);
+                }
+            }
 
             styleRepository.saveAll(request.getStyles().stream().map(style -> new Style(null, itemId, style)).toList());
             tagRepository.saveAll(request.getTags().stream().map(tag -> new Tag(null, itemId, tag)).toList());

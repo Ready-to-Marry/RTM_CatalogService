@@ -34,7 +34,7 @@ public class DummyDataGenerator {
             FieldType field = fields.get(random.nextInt(fields.size()));
             CategoryType category = categories.get(random.nextInt(categories.size())); // 필드명과 동일하다면 가능
 
-            String name = names.get(random.nextInt(names.size())) + names.get(random.nextInt(names.size())) + (i + 1);
+            String name = "더미" + names.get(random.nextInt(names.size())) + names.get(random.nextInt(names.size())) + (i + 1);
             String region = regions.get(random.nextInt(regions.size()));
             Long price = random.nextLong(1_000_000) + 100_000;
 
