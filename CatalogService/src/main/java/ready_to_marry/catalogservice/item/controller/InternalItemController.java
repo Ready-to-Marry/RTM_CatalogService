@@ -3,6 +3,7 @@ package ready_to_marry.catalogservice.item.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ready_to_marry.catalogservice.common.dto.ApiResponse;
+import ready_to_marry.catalogservice.common.exception.NotFoundException;
 import ready_to_marry.catalogservice.item.dto.request.ItemNameRequest;
 import ready_to_marry.catalogservice.item.dto.response.ItemNameResponse;
 import ready_to_marry.catalogservice.item.repository.ItemRepository;
@@ -30,5 +31,14 @@ public class InternalItemController {
                 .toList();
 
         return ApiResponse.success(result);
+    }
+
+    // item_id에 해당하는 partner_id 반환
+    @GetMapping("/{itemId}/partner-id")
+    public ApiResponse<Long> getPartnerIdByItemId(@PathVariable Long itemId) {
+        Long partnerId = itemRepository.findById(itemId)
+                .map(item -> item.getPartnerId())
+                .orElseThrow(() -> new NotFoundException("해당 item이 존재하지 않습니다."));
+        return ApiResponse.success(partnerId);
     }
 }
