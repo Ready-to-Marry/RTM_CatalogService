@@ -53,6 +53,9 @@ dependencies {
     // Spring Boot Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Micrometer-Registry
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
     // Eureka Client
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
