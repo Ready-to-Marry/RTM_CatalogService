@@ -1,12 +1,14 @@
 package ready_to_marry.catalogservice.item.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import ready_to_marry.catalogservice.item.enums.CategoryType;
 import ready_to_marry.catalogservice.item.enums.FieldType;
 
 import java.util.List;
 
+@Builder
 @Getter
 public class ItemRegisterRequest {
 
